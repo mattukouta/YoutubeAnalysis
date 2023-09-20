@@ -1,13 +1,24 @@
 [versions]
 agp = "8.3.0-alpha04"
 kotlin = "1.9.0"
-core-ktx = "1.10.1"
+core-ktx = "1.12.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.1.5"
 espresso-core = "3.5.1"
-lifecycle-runtime-ktx = "2.6.1"
-activity-compose = "1.7.0"
-compose-bom = "2023.08.00"
+lifecycle-runtime-ktx = "2.6.2"
+activity-compose = "1.7.2"
+compose-bom = "2023.09.00"
+appcompat = "1.6.1"
+material = "1.9.0"
+annotation = "1.7.0"
+navigation-common-ktx = "2.7.2"
+material3 = "1.1.1"
+composeHiltNavigatiaon = "1.0.0"
+app-auth = "0.11.0"
+datastoreCore = "1.0.0"
+timber = "5.0.1"
+dagger = "2.48"
+ksp = "1.9.0-1.0.13"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -24,8 +35,28 @@ ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 material3 = { group = "androidx.compose.material3", name = "material3" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+annotation = { group = "androidx.annotation", name = "annotation", version.ref = "annotation" }
+androidx-navigation-common-ktx = { group = "androidx.navigation", name = "navigation-common-ktx", version.ref = "navigation-common-ktx" }
+composeNavigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation-common-ktx" }
+androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigation-common-ktx" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+composeHiltNavigtation = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "composeHiltNavigatiaon" }
+app-auth = { group = "net.openid", name = "appauth", version.ref = "app-auth" }
+androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "datastoreCore" }
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber"}
+
+daggerHiltAndroid = { module = "com.google.dagger:hilt-android", version.ref = "dagger" }
+daggerHiltAndroidCompiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "dagger" }
+
+javaPoet = { module = "com.squareup:javapoet", version = "1.13.0" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
+hiltGradlePlugin = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 

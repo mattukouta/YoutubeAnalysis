@@ -3,5 +3,17 @@
 plugins {
     alias(libs.plugins.androidApplication) apply false
     alias(libs.plugins.kotlinAndroid) apply false
+    alias(libs.plugins.androidLibrary) apply false
+//    alias(libs.plugins.hiltGradlePlugin) apply false
 }
 true // Needed to make the Suppress annotation work for the plugins block
+
+buildscript {
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            when {
+                requested.name == "javapoet" -> useVersion("1.13.0")
+            }
+        }
+    }
+}

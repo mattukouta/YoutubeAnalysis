@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "YoutubeAnalyze"
 include(":app")
+include(":feature:home")
