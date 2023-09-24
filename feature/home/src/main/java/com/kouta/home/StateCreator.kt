@@ -6,9 +6,11 @@ import javax.inject.Inject
 class StateCreator @Inject constructor() {
     fun create(
         isLogin: Boolean,
-        user: User?
+        user: User?,
+        isLoading: Boolean
     ) = UiState(
         isLogin = isLogin,
-        user = user
+        user = user,
+        isShowLoading = isLoading
     )
 }

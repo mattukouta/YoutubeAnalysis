@@ -1,19 +1,19 @@
 package com.kouta.home
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
-
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kouta.auth.AuthRepository
+import com.kouta.extension.combine
 import com.kouta.extension.launch
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
@@ -25,9 +25,9 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
     sealed class Action {
         data class Login(val launcher: ActivityResultLauncher<Intent>) : Action()
-        data object Refresh : Action()
         data object Logout : Action()
         data class LoginSuccess(val intent: Intent) : Action()
+        data object LoginCanceled : Action()
         data object LoginFailed : Action()
     }
 
@@ -37,11 +37,14 @@ class HomeViewModel @Inject constructor(
 
     private val isLogin = authRepository.isLogin
     private val user = authRepository.user
+    private val isLoading = MutableStateFlow(false)
 
-    val uiState: StateFlow<UiState> = isLogin.combine(
-        user
-    ) { isLogin, user ->
-        stateCreator.create(isLogin, user)
+    val uiState: StateFlow<UiState> = combine(
+        isLogin,
+        user,
+        isLoading
+    ) { isLogin, user, isLoading ->
+        stateCreator.create(isLogin, user, isLoading)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, UiState())
 
     private val _viewEvent: Channel<ViewEvent> = Channel()
@@ -52,9 +55,6 @@ class HomeViewModel @Inject constructor(
             is Action.Login -> {
                 login(it.launcher)
             }
-            Action.Refresh -> {
-                refresh()
-            }
             Action.Logout -> {
                 logout()
             }
@@ -63,9 +63,12 @@ class HomeViewModel @Inject constructor(
                 sendDebugLog("LoginSuccess")
 
                 launch {
-                    authRepository.requestAccessTokenFromIntent(it.intent)
-//                    authRepository.getAccessToken()
+                    authRepository.requestAccessTokenFromIntent(it.intent, onSuccess = { finishLoading() })
                 }
+            }
+
+            Action.LoginCanceled -> {
+                finishLoading()
             }
 
             Action.LoginFailed -> {
@@ -76,6 +79,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun login(launcher: ActivityResultLauncher<Intent>) {
+        startLoading()
 
         authRepository.login(launcher)
     }
@@ -86,11 +90,21 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun logout() {
-        authRepository.logout()
+        startLoading()
+
+        authRepository.logout(onSuccess = { finishLoading() })
     }
 
     private fun sendDebugLog(message: String) = launch {
         _viewEvent.send(ViewEvent.DebugLog(message))
+    }
+
+    private fun startLoading() {
+        isLoading.value = true
+    }
+
+    private fun finishLoading() {
+        isLoading.value = false
     }
 }
 

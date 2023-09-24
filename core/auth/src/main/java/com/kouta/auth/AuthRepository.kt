@@ -85,12 +85,14 @@ class AuthRepository @Inject constructor(
         launcher.launch(authIntent)
     }
 
-    fun logout() {
+    fun logout(onSuccess: () -> Unit = {}) {
         authState.update(null)
         save(authState)
+
+        onSuccess()
     }
 
-    suspend fun requestAccessTokenFromIntent(intent: Intent) {
+    suspend fun requestAccessTokenFromIntent(intent: Intent, onSuccess: () -> Unit) {
         val response = AuthorizationResponse.fromIntent(intent)
         val exception = AuthorizationException.fromIntent(intent)
 
@@ -100,6 +102,8 @@ class AuthRepository @Inject constructor(
             authService.performTokenRequest(response.createTokenExchangeRequest()) { tokenResponse, tokenException ->
                 authState.update(tokenResponse, tokenException)
                 save(authState)
+
+                onSuccess()
             }
         }
     }

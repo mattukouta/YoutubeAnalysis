@@ -2,6 +2,7 @@ package com.kouta.design.resource
 
 import androidx.compose.ui.graphics.Color
 
+// Light Theme Color
 val PrimaryLight = Color(0xFF7E4894)
 val OnPrimaryLight = Color(0xFFFFFFFF)
 val PrimaryContainerLight = Color(0xFFF8D8FF)
@@ -34,6 +35,7 @@ val ScrimLight = Color(0xFF000000)
 
 val ShadowLight = Color(0xFF000000)
 
+// Dark Theme Color
 val PrimaryDark = Color(0xFFEBB2FF)
 val OnPrimaryDark = Color(0xFF4B1662)
 val PrimaryContainerDark = Color(0xFF64307B)
@@ -65,3 +67,5 @@ val OutlineVariantDark = Color(0xFF4C444D)
 val ScrimDark = Color(0xFF000000)
 
 val ShadowDark = Color(0xFF000000)
+
+// Common Color

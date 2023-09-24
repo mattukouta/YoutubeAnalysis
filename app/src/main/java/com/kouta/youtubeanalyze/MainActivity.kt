@@ -8,7 +8,7 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.kouta.home.homeScreen
-import com.kouta.youtubeanalyze.ui.theme.YoutubeAnalyzeTheme
+import com.kouta.design.resource.YoutubeAnalyzeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
