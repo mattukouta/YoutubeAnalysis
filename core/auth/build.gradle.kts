@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.kouta.home"
+    namespace = "com.kouta.auth"
     compileSdk = 34
 
     defaultConfig {
@@ -34,39 +34,23 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
-    }
 }
 
 dependencies {
-    // project
-    implementation(project(":core:auth"))
-    implementation(project(":core:extension"))
-    implementation(project(":core:design"))
-
-    // compose
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.navigation.compose)
-
-    implementation(libs.hilt.navigation.compose)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     implementation(libs.javaPoet)
 
     implementation(libs.app.auth)
-
+    implementation(libs.jwt)
+    implementation(libs.tink)
     implementation(libs.timber)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.androidx.navigation.common.ktx)
-    implementation(libs.androidx.material3)
+    implementation(libs.androidx.datastore)
+    implementation(libs.androidx.datastore.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.espresso.core)

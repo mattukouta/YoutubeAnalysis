@@ -16,3 +16,6 @@ dependencyResolutionManagement {
 rootProject.name = "YoutubeAnalyze"
 include(":app")
 include(":feature:home")
+include(":core:auth")
+include(":core:extension")
+include(":core:design")

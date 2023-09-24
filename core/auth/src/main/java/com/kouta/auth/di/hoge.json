@@ -1,0 +1,22 @@
+{
+  "request": {
+    "configuration": {
+      "authorizationEndpoint": "https:\/\/accounts.google.com\/o\/oauth2\/v2\/auth",
+      "tokenEndpoint": "https:\/\/oauth2.googleapis.com\/token"
+    },
+    "clientId": "1056937266327-54uei3vprt13b6q3mu4a078i5r3v3oss.apps.googleusercontent.com",
+    "responseType": "code",
+    "redirectUri": "com.kouta.youtubeanalyze:\/google",
+    "scope": "https:\/\/www.googleapis.com\/auth\/youtube https:\/\/www.googleapis.com\/auth\/youtube.readonly",
+    "state": "sr7po4XB3LpjL_-VjeM21A",
+    "nonce": "Vwlp2UBVt7bLE3NaXKtfSg",
+    "codeVerifier": "hhVyw-X9ZXTV-2pf566wPz3mBKSUDYKdQLER8cO4uO5b_gt35R4_bF5CozEZ_WUFx90V7a9TLWuU0pTQFPyHPA",
+    "codeVerifierChallenge": "LQNKeiqMaNtMdd3m7Dui41qcLHlm9J3x5AZRu51gD-4",
+    "codeVerifierChallengeMethod": "S256",
+    "additionalParameters": {}
+  },
+  "state": "sr7po4XB3LpjL_-VjeM21A",
+  "code": "4\/0AfJohXkqV7S3oEZhQn9le_lnoPQvIxYxGfwHRtNuahwdh-tnCY318R3wz4RnGub4KjJZxw",
+  "scope": "https:\/\/www.googleapis.com\/auth\/youtube https:\/\/www.googleapis.com\/auth\/youtube.readonly",
+  "additional_parameters": {}
+}

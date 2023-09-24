@@ -2,13 +2,10 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt.android)
 }
 
 android {
-    namespace = "com.kouta.home"
+    namespace = "com.kouta.design"
     compileSdk = 34
 
     defaultConfig {
@@ -43,30 +40,16 @@ android {
 }
 
 dependencies {
-    // project
-    implementation(project(":core:auth"))
-    implementation(project(":core:extension"))
-    implementation(project(":core:design"))
-
-    // compose
+    // Compose
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.navigation.compose)
 
-    implementation(libs.hilt.navigation.compose)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
-    implementation(libs.javaPoet)
-
-    implementation(libs.app.auth)
-
-    implementation(libs.timber)
+    // Coil]
+    implementation(libs.coil)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.androidx.navigation.common.ktx)
-    implementation(libs.androidx.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.espresso.core)
