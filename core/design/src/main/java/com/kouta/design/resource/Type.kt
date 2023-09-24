@@ -1,4 +1,4 @@
-package com.kouta.youtubeanalyze.ui.theme
+package com.kouta.design.resource
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

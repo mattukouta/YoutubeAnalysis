@@ -1,30 +1,24 @@
 package com.kouta.home
 
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.kouta.design.NetworkImage
 import com.kouta.home.HomeViewModel.Action
-import kotlinx.coroutines.flow.map
 import timber.log.Timber
 
 const val homeScreen = "HomeScreen"
@@ -73,6 +67,7 @@ fun HomeScreenRoute(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     uiState: UiState,
@@ -80,7 +75,15 @@ fun HomeScreen(
     onClickRefresh: () -> Unit,
     onClickLogout: () -> Unit
 ) {
-    Scaffold {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { 
+                    Text(text = "home")
+                },
+            )
+        }
+    ) {
         Column(modifier = Modifier.padding(it)) {
             if (!uiState.isLogin) {
                 Button(onClick = onClickLogin) {

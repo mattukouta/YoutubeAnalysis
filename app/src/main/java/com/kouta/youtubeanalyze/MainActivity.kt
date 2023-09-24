@@ -6,9 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.Surface
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.kouta.home.HomeScreen
 import com.kouta.home.homeScreen
 import com.kouta.youtubeanalyze.ui.theme.YoutubeAnalyzeTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -21,7 +19,9 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            YoutubeAnalyzeTheme {
+            YoutubeAnalyzeTheme(
+                dynamicColor = false
+            ) {
                 Surface {
                     NavHost(
                         navController = rememberNavController(),

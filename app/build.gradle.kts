@@ -71,6 +71,7 @@ dependencies {
 
     // project
     implementation(project(":core:auth"))
+    implementation(project(":core:design"))
     implementation(project(":feature:home"))
 
     testImplementation(libs.junit)
