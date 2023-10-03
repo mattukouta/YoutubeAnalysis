@@ -6,17 +6,21 @@ import android.net.Uri
 import androidx.activity.result.ActivityResultLauncher
 import androidx.datastore.core.DataStore
 import com.auth0.android.jwt.JWT
+import com.kouta.auth.vo.LoginState
+import com.kouta.auth.vo.User
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
+import net.openid.appauth.AuthorizationRequest.Scope
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.AuthorizationServiceConfiguration
@@ -36,22 +40,23 @@ class AuthRepository @Inject constructor(
     companion object {
         private const val AUTHORIZATION_EP_URI = "https://accounts.google.com/o/oauth2/v2/auth"
         private const val TOKEN_EP_URI = "https://oauth2.googleapis.com/token"
-        private const val CLIENT_ID = "1056937266327-54uei3vprt13b6q3mu4a078i5r3v3oss.apps.googleusercontent.com"
+        private const val CLIENT_ID =
+            "1026085422445-5an0m5m84rmsodo2t99p778s95jdq8m0.apps.googleusercontent.com"
         private const val REDIRECT_PATH = "/google"
         private val SCOPES = listOf(
             "https://www.googleapis.com/auth/youtube",
-            "openid",
-            "profile"
+            Scope.OPENID,
+            Scope.PROFILE
         )
     }
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var authState: AuthState = AuthState.jsonDeserialize("{}")
 
-    val isLogin = authDataStore.data.map {
+    private val isLogin = authDataStore.data.map {
         it.isAuthorized
     }
-    val user = authDataStore.data.map { authState ->
+    private val user = authDataStore.data.map { authState ->
         authState.idToken?.let {
             val jwt = JWT(it)
 
@@ -59,6 +64,22 @@ class AuthRepository @Inject constructor(
                 name = jwt.claims["name"]?.asString() ?: "未設定",
                 profileUrl = jwt.claims["picture"]?.asString() ?: "未設定"
             )
+        }
+    }
+
+    val loginState = isLogin.combine(user) { isLogin, user ->
+        when {
+            isLogin && user != null -> LoginState.Login(user)
+            !isLogin -> LoginState.NotLogin
+            else -> LoginState.Error
+        }
+    }
+
+    init {
+        coroutineScope.launch {
+            authDataStore.data.firstOrNull()?.let {
+                authState = it
+            }
         }
     }
 
@@ -73,7 +94,7 @@ class AuthRepository @Inject constructor(
                 ),
                 CLIENT_ID,
                 ResponseTypeValues.CODE,
-                Uri.parse("${context.packageName}:$REDIRECT_PATH")
+                Uri.parse("${context.packageName}:$REDIRECT_PATH:")
             )
             .setScopes(SCOPES)
             .build()
@@ -110,7 +131,10 @@ class AuthRepository @Inject constructor(
 
     suspend fun requestAccessToken(): String? {
         if (authState.needsTokenRefresh) {
-            val result = authService.performTokenRequest(authState.createTokenRefreshRequest(), authState.clientAuthentication)
+            val result = authService.performTokenRequest(
+                authState.createTokenRefreshRequest(),
+                authState.clientAuthentication
+            )
             authState.update(result.first, result.second)
             save(authState)
         }

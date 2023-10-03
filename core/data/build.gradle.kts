@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.kouta.home"
+    namespace = "comkouta.data"
     compileSdk = 34
 
     defaultConfig {
@@ -34,48 +34,34 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
-    }
 }
 
 dependencies {
-    // project
     implementation(project(":core:auth"))
-    implementation(project(":core:data"))
-    implementation(project(":core:design"))
-    implementation(project(":core:extension"))
 
-    // compose
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.compose.constraint)
-    debugImplementation(libs.androidx.ui.tooling)
-
-     implementation(libs.androidx.paging)
-     implementation(libs.androidx.paging.compose)
-
-    implementation(libs.hilt.navigation.compose)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     implementation(libs.javaPoet)
 
-    implementation(libs.app.auth)
-
     implementation(libs.timber)
+
+    implementation(libs.squareup.retrofit)
+    implementation(libs.squareup.retrofit.converter)
+    implementation(libs.squareup.okhttp)
+    implementation(libs.squareup.okhttp.logging)
+    implementation(libs.squareup.moshi)
+    implementation(libs.squareup.moshi.kotlin)
+    implementation(libs.squareup.moshi.codegen)
+
+    implementation(libs.androidx.room)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.paging)
+    implementation(libs.androidx.paging)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.androidx.navigation.common.ktx)
-    implementation(libs.androidx.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.espresso.core)
