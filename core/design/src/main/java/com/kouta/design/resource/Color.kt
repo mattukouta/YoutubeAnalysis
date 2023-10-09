@@ -69,3 +69,5 @@ val ScrimDark = Color(0xFF000000)
 val ShadowDark = Color(0xFF000000)
 
 // Common Color
+val White = Color(0xFFFFFFFF)
+val Red = Color(0xFFBA1A1A)

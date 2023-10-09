@@ -9,6 +9,7 @@ sealed class ApiResponse<out T: Any?> {
     }
 
     fun isError() = this is Error
+    fun isSuccess() = this is Success
     suspend fun <T> ApiResponse<T>.onSuccess(action: suspend (T) -> Unit): ApiResponse<T>  {
         if (this is Success) {
             action(this.data)
