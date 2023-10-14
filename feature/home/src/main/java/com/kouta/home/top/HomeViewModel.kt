@@ -1,4 +1,4 @@
-package com.kouta.home
+package com.kouta.home.top
 
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import com.kouta.auth.AuthRepository
 import com.kouta.auth.vo.LoginState
-import com.kouta.data.usecase.activities.GetChannelActivitiesUseCase
 import com.kouta.data.usecase.channels.GetChannelsUseCase
 import com.kouta.data.usecase.subscriptions.GetSubscriptionsUseCase
 import com.kouta.data.vo.channels.Channels
@@ -30,7 +29,6 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val stateCreator: StateCreator,
     private val authRepository: AuthRepository,
-    private val getChannelActivitiesUseCase: GetChannelActivitiesUseCase,
     private val getChannelsUseCase: GetChannelsUseCase,
     private val getSubscriptionsUseCase: GetSubscriptionsUseCase
 ) : ViewModel() {
@@ -42,11 +40,13 @@ class HomeViewModel @Inject constructor(
         data object LoginFailed : Action()
         data object Request : Action()
         data class OnClickChannel(val channelId: String) : Action()
+        data object OnClickFavoriteChannelContents : Action()
     }
 
     sealed class ViewEvent {
         data class DebugLog(val message: String) : ViewEvent()
         data class NavigateYoutubeChannel(val channelId: String) : ViewEvent()
+        data object NavigateFavoriteChannelContents : ViewEvent()
     }
 
     private val isLoading = MutableStateFlow(false)
@@ -70,13 +70,9 @@ class HomeViewModel @Inject constructor(
     val dispatch: (Action) -> Unit = {
         launch {
             when (it) {
-                is Action.Login -> {
-                    login(it.launcher)
-                }
+                is Action.Login -> login(it.launcher)
 
-                Action.Logout -> {
-                    logout()
-                }
+                Action.Logout -> logout()
 
                 is Action.LoginSuccess -> {
 
@@ -88,9 +84,7 @@ class HomeViewModel @Inject constructor(
                         onSuccess = { finishLoading() })
                 }
 
-                Action.LoginCanceled -> {
-                    finishLoading()
-                }
+                Action.LoginCanceled -> finishLoading()
 
                 Action.LoginFailed -> {
                     // TODO ログイン失敗時の処理
@@ -106,9 +100,9 @@ class HomeViewModel @Inject constructor(
                     }
                 }
 
-                is Action.OnClickChannel -> {
-                    navigateYoutubeChannel(it.channelId)
-                }
+                is Action.OnClickChannel -> navigateYoutubeChannel(it.channelId)
+
+                Action.OnClickFavoriteChannelContents -> navigateFavoriteChannelContents()
             }
         }
     }
@@ -250,6 +244,10 @@ class HomeViewModel @Inject constructor(
 
     private suspend fun navigateYoutubeChannel(channelId: String) {
         _viewEvent.send(ViewEvent.NavigateYoutubeChannel(channelId))
+    }
+
+    private suspend fun navigateFavoriteChannelContents() {
+        _viewEvent.send(ViewEvent.NavigateFavoriteChannelContents)
     }
 }
 

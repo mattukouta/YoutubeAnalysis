@@ -5,6 +5,7 @@ plugins {
 
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
+    id("kotlin-kapt")
 }
 
 android {
@@ -47,11 +48,16 @@ dependencies {
 
     implementation(libs.squareup.retrofit)
     implementation(libs.squareup.retrofit.converter)
+    implementation(libs.tikxml.annotation)
+    implementation(libs.tikxml.core)
+    implementation(libs.tikxml.retrofit.converter)
+    kapt(libs.tikxml.processor)
+
     implementation(libs.squareup.okhttp)
     implementation(libs.squareup.okhttp.logging)
     implementation(libs.squareup.moshi)
     implementation(libs.squareup.moshi.kotlin)
-    implementation(libs.squareup.moshi.codegen)
+    ksp(libs.squareup.moshi.codegen)
 
     implementation(libs.androidx.room)
     implementation(libs.androidx.room.ktx)

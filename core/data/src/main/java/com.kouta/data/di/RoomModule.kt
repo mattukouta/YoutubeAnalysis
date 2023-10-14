@@ -2,6 +2,7 @@ package com.kouta.data.di
 
 import android.content.Context
 import androidx.room.Room
+import com.kouta.data.vo.dao.SearchDatabase
 import com.kouta.data.vo.dao.SubscriptionDatabase
 import dagger.Module
 import dagger.Provides
@@ -17,9 +18,19 @@ object RoomModule {
     @Singleton
     fun providesSubscriptionDatabase(
         @ApplicationContext context: Context
-    ) = Room.databaseBuilder(context, SubscriptionDatabase::class.java, "subscription_database").build()
+    ) = Room.inMemoryDatabaseBuilder(context, SubscriptionDatabase::class.java).build()
 
     @Provides
     @Singleton
     fun providesSubscriptionDao(database: SubscriptionDatabase) = database.subscriptionDao()
+
+    @Provides
+    @Singleton
+    fun providesSearchVideoDatabase(
+        @ApplicationContext context: Context
+    ) = Room.inMemoryDatabaseBuilder(context, SearchDatabase::class.java).build()
+
+    @Provides
+    @Singleton
+    fun providesSearchVideoDao(database: SearchDatabase) = database.searchVideoDao()
 }

@@ -1,5 +1,6 @@
 package com.kouta.data
 
+import com.kouta.data.enums.LiveBroadcastContent
 import com.kouta.data.vo.activities.ChannelActivities
 import com.kouta.data.vo.subscriptions.Subscriptions
 import com.squareup.moshi.FromJson
@@ -24,4 +25,9 @@ class JsonAdapter {
     fun fromJsonToSubscriptionType(type: String) =
         Subscriptions.Response.Subscription.ContentDetails.Type.entries.firstOrNull { it.value == type }
             ?: Subscriptions.Response.Subscription.ContentDetails.Type.UNKNOWN
+
+    @FromJson
+    fun fromJsonToLiveBroadcastContent(liveBroadcastContent: String) =
+         LiveBroadcastContent.entries.firstOrNull { it.value == liveBroadcastContent }
+            ?: LiveBroadcastContent.UNKNOWN
 }

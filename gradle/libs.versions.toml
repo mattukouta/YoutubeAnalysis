@@ -44,6 +44,7 @@ viewmodel-ktx = "2.6.2"
 retrofit = "2.9.0"
 okhttp = "4.11.0"
 moshi = "1.15.0"
+tikxml = "0.8.13"
 
 # Coil
 coil = "2.4.0"
@@ -99,6 +100,10 @@ javaPoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 # Api
 squareup-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit"}
 squareup-retrofit-converter = { group = "com.squareup.retrofit2", name = "converter-moshi", version.ref = "retrofit"}
+tikxml-annotation = { group = "com.tickaroo.tikxml", name = "annotation", version.ref = "tikxml"}
+tikxml-core = { group = "com.tickaroo.tikxml", name = "core", version.ref = "tikxml"}
+tikxml-processor = { group = "com.tickaroo.tikxml", name = "processor", version.ref = "tikxml"}
+tikxml-retrofit-converter = { group = "com.tickaroo.tikxml", name = "retrofit-converter", version.ref = "tikxml"}
 squareup-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp"}
 squareup-okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp"}
 squareup-moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "moshi"}

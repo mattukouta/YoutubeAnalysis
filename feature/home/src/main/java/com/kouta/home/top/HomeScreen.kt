@@ -1,4 +1,4 @@
-package com.kouta.home
+package com.kouta.home.top
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -8,7 +8,6 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -23,17 +22,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,31 +45,52 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.kouta.auth.vo.User
 import com.kouta.data.vo.ApiResponse
 import com.kouta.data.vo.entity.SubscriptionEntity
+import com.kouta.design.R
 import com.kouta.design.ScreenState
 import com.kouta.design.compose.ErrorPanel
 import com.kouta.design.compose.NetworkImage
+import com.kouta.design.compose.NetworkImageCircle
 import com.kouta.design.compose.NotLoginPanel
 import com.kouta.design.compose.UnknownProfileImage
+import com.kouta.design.compose.YoutubeTopAppBar
 import com.kouta.design.compose.dialog.LoadingPanel
 import com.kouta.design.resource.YoutubeAnalyzeTheme
-import com.kouta.home.HomeViewModel.Action
-import com.kouta.home.HomeViewModel.ViewEvent
+import com.kouta.home.channel.FavoriteChannelContentsRoute
+import com.kouta.home.top.HomeViewModel.Action
+import com.kouta.home.top.HomeViewModel.ViewEvent
+import kotlinx.coroutines.flow.flowOf
 import timber.log.Timber
 
-const val homeScreen = "HomeScreen"
-fun NavGraphBuilder.homeScreen() {
-    composable(homeScreen) {
-        HomeScreenRoute()
+enum class HomeScreen {
+    HOME_TOP,
+    HOME_FAVORITE_CHANNEL_CONTENTS;
+
+}
+fun NavGraphBuilder.homeScreen(
+    onNavigateFavoriteChannelContents: () -> Unit,
+    onClickBack: () -> Unit
+) {
+    composable(HomeScreen.HOME_TOP.name) {
+        HomeScreenRoute(
+            onNavigateFavoriteChannelContents = onNavigateFavoriteChannelContents
+        )
+    }
+    composable(HomeScreen.HOME_FAVORITE_CHANNEL_CONTENTS.name) {
+        FavoriteChannelContentsRoute(
+            onClickBack = onClickBack
+        )
     }
 }
 
 @Composable
 fun HomeScreenRoute(
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    onNavigateFavoriteChannelContents: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val dispatch = viewModel.dispatch
@@ -106,6 +123,7 @@ fun HomeScreenRoute(
                 is ViewEvent.DebugLog -> {
                     Timber.d("ktakamat HomeViewModel ${it.message}")
                 }
+
                 is ViewEvent.NavigateYoutubeChannel -> {
                     val url = "https://www.youtube.com/${it.channelId}"
                     try {
@@ -118,6 +136,8 @@ fun HomeScreenRoute(
                         navigateCustomTab(url, context)
                     }
                 }
+
+                ViewEvent.NavigateFavoriteChannelContents -> onNavigateFavoriteChannelContents()
             }
         }
     }
@@ -135,6 +155,9 @@ fun HomeScreenRoute(
         },
         onClickChannel = {
             dispatch(Action.OnClickChannel(it))
+        },
+        onClickFavoriteChannelContentsList = {
+            dispatch(Action.OnClickFavoriteChannelContents)
         }
     )
 }
@@ -156,25 +179,22 @@ fun HomeScreen(
     onClickLogin: () -> Unit,
     onClickLogout: () -> Unit,
     onClickRequest: () -> Unit,
-    onClickChannel: (channelId: String) -> Unit
+    onClickChannel: (channelId: String) -> Unit,
+    onClickFavoriteChannelContentsList: () -> Unit
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = "home")
-                },
+            YoutubeTopAppBar(
+                title = "home",
                 actions = {
                     val screenState = uiState.screenState
                     if (screenState is ScreenState.Fetched.Success) {
                         Box {
                             var expanded by remember { mutableStateOf(false) }
 
-                            NetworkImage(
+                            NetworkImageCircle(
                                 modifier = Modifier
                                     .size(24.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.onSurfaceVariant)
                                     .clickable(
                                         indication = rememberRipple(),
                                         interactionSource = remember { MutableInteractionSource() },
@@ -182,6 +202,7 @@ fun HomeScreen(
                                             expanded = true
                                         }
                                     ),
+
                                 imageUrl = screenState.data?.profileUrl ?: ""
                             )
 
@@ -228,12 +249,11 @@ fun HomeScreen(
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(
-                            text = "ログイン済み"
-                        )
+
+                        Text(text = "登録チャンネル一覧")
 
                         LazyRow(
-                            modifier = Modifier.padding(vertical = 16.dp),
+                            modifier = Modifier.padding(top = 8.dp),
                             state = subscriptionListState,
                             contentPadding = PaddingValues(horizontal = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -247,15 +267,13 @@ fun HomeScreen(
                             }
                         }
 
-                        val text = when (val result = uiState.channel) {
-                            is ApiResponse.Error.Default -> result.message
-                            ApiResponse.Error.ParseException -> "parse error"
-                            is ApiResponse.Success -> result.data.nextPageToken
-                        }
-                        Text(text = text)
-
-                        Button(onClick = onClickRequest) {
-                            Text(text = "Channel Activities")
+                        Button(
+                            modifier = Modifier
+                                .padding(top = 16.dp, start = 32.dp, end = 32.dp)
+                                .fillMaxWidth(),
+                            onClick = onClickFavoriteChannelContentsList
+                        ) {
+                            Text(text = "登録チャンネルのコンテンツ一覧画面へ")
                         }
                     }
                 }
@@ -285,7 +303,8 @@ fun SubscriptionAt(subscription: SubscriptionEntity, onClick: () -> Unit) {
                 interactionSource = remember { MutableInteractionSource() },
                 onClick = onClick
             ),
-        imageUrl = subscription.imageUrl
+        imageUrl = subscription.imageUrl,
+        placeHolderRes = R.drawable.ic_person
     )
 }
 
@@ -311,12 +330,49 @@ fun PreviewHomeScreen() {
         HomeScreen(
             uiState = UiState(
                 screenState = ScreenState.Fetched.Success(data = User.fixture()),
-                channel = ApiResponse.Error.ParseException
+                channel = ApiResponse.Error.ParseException,
+                subscriptions = flowOf(
+                    PagingData.from(
+                        listOf(
+                            SubscriptionEntity(
+                                id = "adolescens",
+                                title = "eget",
+                                imageUrl = "https://duckduckgo.com/?q=tamquam"
+                            ),
+                            SubscriptionEntity(
+                                id = "adolescens",
+                                title = "eget",
+                                imageUrl = "https://duckduckgo.com/?q=tamquam"
+                            ),
+                            SubscriptionEntity(
+                                id = "adolescens",
+                                title = "eget",
+                                imageUrl = "https://duckduckgo.com/?q=tamquam"
+                            ),
+                            SubscriptionEntity(
+                                id = "adolescens",
+                                title = "eget",
+                                imageUrl = "https://duckduckgo.com/?q=tamquam"
+                            ),
+                            SubscriptionEntity(
+                                id = "adolescens",
+                                title = "eget",
+                                imageUrl = "https://duckduckgo.com/?q=tamquam"
+                            ),
+                            SubscriptionEntity(
+                                id = "adolescens",
+                                title = "eget",
+                                imageUrl = "https://duckduckgo.com/?q=tamquam"
+                            )
+                        )
+                    )
+                )
             ),
             onClickLogin = {},
             onClickLogout = {},
             onClickRequest = {},
-            onClickChannel = {}
+            onClickChannel = {},
+            onClickFavoriteChannelContentsList = {}
         )
     }
 }

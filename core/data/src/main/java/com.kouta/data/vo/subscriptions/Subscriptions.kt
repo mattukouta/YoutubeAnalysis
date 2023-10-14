@@ -2,6 +2,7 @@ package com.kouta.data.vo.subscriptions
 
 import androidx.annotation.IntRange
 import com.kouta.data.vo.PageInfo
+import com.kouta.data.vo.Thumbnail
 import com.squareup.moshi.JsonClass
 
 class Subscriptions {
@@ -62,14 +63,7 @@ class Subscriptions {
                 val default: Thumbnail,
                 val medium: Thumbnail,
                 val high: Thumbnail
-            ) {
-                @JsonClass(generateAdapter = true)
-                data class Thumbnail(
-                    val url: String,
-                    val width: Int?,
-                    val height: String?
-                )
-            }
+            )
         }
     }
 
