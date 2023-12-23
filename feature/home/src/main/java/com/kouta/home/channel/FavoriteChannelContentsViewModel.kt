@@ -4,9 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import com.kouta.data.enums.LiveBroadcastContent
+import com.kouta.data.enums.RefreshType
+import com.kouta.data.enums.RefreshType.INITIAL_LOADING
+import com.kouta.data.enums.RefreshType.LOAD_CHANGE
+import com.kouta.data.usecase.subscriptions.GetSubscriptionsUseCase
 import com.kouta.data.usecase.video.GetSubscriptionVideoUseCase
 import com.kouta.data.vo.entity.SubscriptionVideo
 import com.kouta.extension.launch
+import com.kouta.home.channel.vo.ItemState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -19,10 +24,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
+
 @HiltViewModel
 class FavoriteChannelContentsViewModel @Inject constructor(
     private val stateCreator: StateCreator,
-    private val getSubscriptionVideoUseCase: GetSubscriptionVideoUseCase
+    private val itemStateCreator: ItemStateCreator,
+    private val getSubscriptionVideoUseCase: GetSubscriptionVideoUseCase,
+    private val getSubscriptionsUseCase: GetSubscriptionsUseCase
 ) : ViewModel() {
     sealed class Action {
         data object OnClickBack : Action()
@@ -36,14 +44,19 @@ class FavoriteChannelContentsViewModel @Inject constructor(
     private val _viewEvent: Channel<ViewEvent> = Channel()
     val viewEvent = _viewEvent.receiveAsFlow()
 
-    private val filterFlow: MutableStateFlow<LiveBroadcastContent> = MutableStateFlow(LiveBroadcastContent.UNKNOWN)
+    private val filterFlow: MutableStateFlow<LiveBroadcastContent> =
+        MutableStateFlow(LiveBroadcastContent.UNKNOWN)
+
+    private val subscriptionTotalResultsAvailable =
+        getSubscriptionsUseCase.getTotalResultsAvailable()
+    private val subscriptionVideoTotalResultsAvailable =
+        getSubscriptionVideoUseCase.getTotalResultsAvailable()
 
     private val itemFlow: StateFlow<Flow<PagingData<SubscriptionVideo>>> = filterFlow.map {
         getSubscriptionVideoUseCase.get(viewModelScope, it)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyFlow())
 
-
-    val uiState = itemFlow.combine(filterFlow) { itemFlow, filtersFlow ->
+    val uiState = combine(itemFlow, filterFlow) { itemFlow, filtersFlow ->
         stateCreator.create(itemFlow, filtersFlow)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, UiState())
 

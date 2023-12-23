@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -66,6 +67,16 @@ class HomeViewModel @Inject constructor(
 
     private val _viewEvent: Channel<ViewEvent> = Channel()
     val viewEvent = _viewEvent.receiveAsFlow()
+
+    init {
+        launch {
+            loginState.collect {
+                if(it is LoginState.Login) {
+                    Timber.d("ktakamat access_token=${authRepository.requestAccessToken()}")
+                }
+            }
+        }
+    }
 
     val dispatch: (Action) -> Unit = {
         launch {

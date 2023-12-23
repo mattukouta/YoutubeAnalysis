@@ -1,14 +1,19 @@
 package com.kouta.home.channel
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -21,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow.Companion.Ellipsis
@@ -29,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.kouta.data.enums.LiveBroadcastContent
 import com.kouta.data.vo.Thumbnail
@@ -37,12 +45,17 @@ import com.kouta.data.vo.entity.SubscriptionVideo
 import com.kouta.data.vo.entity.VideoEntity
 import com.kouta.data.vo.video.Video
 import com.kouta.design.R
+import com.kouta.extension.ScreenState
+import com.kouta.design.compose.ErrorPanel
 import com.kouta.design.compose.LiveLabel
 import com.kouta.design.compose.NetworkImage
 import com.kouta.design.compose.NetworkImageCircle
 import com.kouta.design.compose.YoutubeTopAppBar
+import com.kouta.design.compose.dialog.LoadingPanel
 import com.kouta.design.resource.White
 import com.kouta.design.resource.YoutubeAnalyzeTheme
+import com.kouta.extension.toPagingScreenState
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun FavoriteChannelContentsRoute(
@@ -80,49 +93,61 @@ fun FavoriteChannelContentsScreen(
             YoutubeTopAppBar(title = "登録チャンネルコンテンツ一覧", onClickBack = onClickBack)
         }
     ) { paddingValues ->
-        val items = uiState.itemFlow.collectAsLazyPagingItems()
         val isLiveSelected = uiState.filter == LiveBroadcastContent.LIVE
+        val screenState: ScreenState<LazyPagingItems<SubscriptionVideo>> = uiState.itemFlow.collectAsLazyPagingItems().toPagingScreenState()
 
-        Column(
-            modifier = Modifier.padding(paddingValues = paddingValues)
+        Box(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Row {
-                FilterChip(
-                    selected = isLiveSelected,
-                    onClick = {
-                        onClickFilter(LiveBroadcastContent.LIVE)
-                    },
-                    label = {
-                        Text(
-                            modifier = Modifier.padding(horizontal = if (isLiveSelected) 0.dp else 12.dp),
-                            text = "配信中"
-                        )
-                    },
-                    leadingIcon = if (isLiveSelected) {
-                        {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_check),
-                                contentDescription = null,
-                                tint = White
+            when (screenState) {
+                is ScreenState.Fetched.Success -> {
+                    val items = screenState.data
+
+                    Column(
+                        modifier = Modifier.padding(paddingValues = paddingValues)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
+                                .padding(horizontal = 24.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            FilterChip(
+                                isLiveSelected = uiState.filter == LiveBroadcastContent.LIVE,
+                                onClickFilter = { onClickFilter(LiveBroadcastContent.LIVE) },
+                                label = "配信中"
+                            )
+
+                            FilterChip(
+                                isLiveSelected = uiState.filter == LiveBroadcastContent.UPCOMING,
+                                onClickFilter = { onClickFilter(LiveBroadcastContent.UPCOMING) },
+                                label = "配信予定"
                             )
                         }
-                    } else {
-                        null
-                    }
-                )
-            }
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                items(items.itemCount) {
-                    items[it]?.let { item ->
-                        ContentItemAt(
-                            item = item
-                        )
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            items(items.itemCount) {
+                                items[it]?.let { item ->
+                                    ContentItemAt(
+                                        item = item
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
+
+                is ScreenState.Fetched.ZeroMatch -> {
+                    Text(modifier = Modifier.align(Alignment.Center), text = "ゼロマッチ")
+                }
+
+                ScreenState.Loading.Initial -> LoadingPanel()
+                is ScreenState.Error -> ErrorPanel(message = "error")
+                ScreenState.None -> {}
             }
         }
     }
@@ -245,6 +270,36 @@ fun PreviewSearchItemAt() {
             )
         )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FilterChip(
+    isLiveSelected: Boolean,
+    onClickFilter: () -> Unit,
+    label: String,
+) {
+    FilterChip(
+        selected = isLiveSelected,
+        onClick = onClickFilter,
+        label = {
+            Text(
+                modifier = Modifier.padding(horizontal = if (isLiveSelected) 0.dp else 12.dp),
+                text = label
+            )
+        },
+        leadingIcon = if (isLiveSelected) {
+            {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_check),
+                    contentDescription = null,
+                    tint = White
+                )
+            }
+        } else {
+            null
+        }
+    )
 }
 
 @Preview

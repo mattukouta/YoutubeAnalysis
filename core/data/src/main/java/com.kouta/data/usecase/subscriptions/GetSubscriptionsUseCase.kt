@@ -28,6 +28,8 @@ class GetSubscriptionsUseCase @Inject constructor(
         const val DATABASE_SIZE = 5
     }
 
+    fun getTotalResultsAvailable() = subscriptionRepository.totalResultsAvailable
+
     @OptIn(ExperimentalPagingApi::class)
     fun get(
         scope: CoroutineScope

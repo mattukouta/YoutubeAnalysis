@@ -49,6 +49,9 @@ interface SubscriptionDao {
 
     @Query("SELECT * FROM VideoEntity, SubscriptionEntity WHERE VideoEntity.liveBroadcastContent = :liveBroadcastContent AND VideoEntity.channelId = SubscriptionEntity.id ORDER BY VideoEntity.`index` ASC")
     fun getSubscriptionVideoFilterLiveBroadcastContent(liveBroadcastContent: LiveBroadcastContent): PagingSource<Int, SubscriptionVideo>
+
+    @Query("SELECT COUNT(*) FROM VideoEntity, SubscriptionEntity WHERE VideoEntity.liveBroadcastContent = :liveBroadcastContent AND VideoEntity.channelId = SubscriptionEntity.id")
+   suspend fun getTotalResultAvailable(liveBroadcastContent: LiveBroadcastContent): Int
 }
 
 @Database(entities = [SubscriptionEntity::class, VideoEntity::class], version = 1, exportSchema = false)

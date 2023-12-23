@@ -51,7 +51,7 @@ import com.kouta.auth.vo.User
 import com.kouta.data.vo.ApiResponse
 import com.kouta.data.vo.entity.SubscriptionEntity
 import com.kouta.design.R
-import com.kouta.design.ScreenState
+import com.kouta.extension.ScreenState
 import com.kouta.design.compose.ErrorPanel
 import com.kouta.design.compose.NetworkImage
 import com.kouta.design.compose.NetworkImageCircle
@@ -187,8 +187,8 @@ fun HomeScreen(
             YoutubeTopAppBar(
                 title = "home",
                 actions = {
-                    val screenState = uiState.screenState
-                    if (screenState is ScreenState.Fetched.Success) {
+                    val screenState = uiState.loginState
+                    if (screenState is UiState.LoginState.Fetched) {
                         Box {
                             var expanded by remember { mutableStateOf(false) }
 
@@ -203,7 +203,7 @@ fun HomeScreen(
                                         }
                                     ),
 
-                                imageUrl = screenState.data?.profileUrl ?: ""
+                                imageUrl = screenState.user.profileUrl
                             )
 
                             DropdownMenu(
@@ -233,19 +233,19 @@ fun HomeScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            when (val screenState = uiState.screenState) {
-                ScreenState.Loading.Initial -> {
+            when (val screenState = uiState.loginState) {
+                UiState.LoginState.Loading -> {
                     LoadingPanel()
                 }
 
-                ScreenState.NotLogin -> {
+                UiState.LoginState.NotLogin -> {
                     NotLoginPanel(
                         mainText = "ログインできていません。データ取得解析を利用する場合ログインしてください。",
                         onClickLogin = onClickLogin
                     )
                 }
 
-                is ScreenState.Fetched.Success -> {
+                is UiState.LoginState.Fetched -> {
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -278,15 +278,12 @@ fun HomeScreen(
                     }
                 }
 
-                is ScreenState.Error -> {
+                is UiState.LoginState.Error -> {
                     ErrorPanel(
                         screenState.message
                     )
                 }
-
-                is ScreenState.Loading.Refreshing<*> -> {}
-                ScreenState.Fetched.ZeroMatch -> {}
-                ScreenState.None -> {}
+                UiState.LoginState.None -> {}
             }
         }
     }
@@ -329,7 +326,7 @@ fun PreviewHomeScreen() {
     YoutubeAnalyzeTheme {
         HomeScreen(
             uiState = UiState(
-                screenState = ScreenState.Fetched.Success(data = User.fixture()),
+                loginState = UiState.LoginState.Fetched(user = User.fixture()),
                 channel = ApiResponse.Error.ParseException,
                 subscriptions = flowOf(
                     PagingData.from(

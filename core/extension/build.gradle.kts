@@ -35,6 +35,9 @@ android {
 
 dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.paging)
+    implementation(libs.androidx.paging.compose)
+    implementation(libs.timber)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
